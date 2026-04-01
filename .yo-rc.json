@@ -1,0 +1,21 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "18.20.8",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.24.0"
+    },
+    "version": "1.20.0",
+    "libraryName": "portal-consejo",
+    "libraryId": "05dcfc6f-2dd0-49e4-92c6-6285367ebf78",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "PortalConsejo",
+    "solutionShortDescription": "PortalConsejo description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
