@@ -6,8 +6,8 @@ import { TextField, PrimaryButton, Stack, Dropdown, IDropdownOption } from "@flu
 /**
  * Componente principal para editar y enviar correo
  */
-export const SendMailForm: React.FC<ISendMailFormProps> = ({ context, configs }) => {
-
+export const SendMailForm: React.FC<ISendMailFormProps> = ({ context, configs, correoService }) => {
+  
   // 🔥 Estado: configuración seleccionada
   const [selectedConfig, setSelectedConfig] = React.useState(configs[0]);
 
@@ -15,6 +15,9 @@ export const SendMailForm: React.FC<ISendMailFormProps> = ({ context, configs })
   const [subject, setSubject] = React.useState(selectedConfig.Asunto);
   const [body, setBody] = React.useState(selectedConfig.CuerpoHTML);
   const [to, setTo] = React.useState(selectedConfig.Destinatarios);
+
+  const [fecha, setFecha] = React.useState("");
+  const [lugar, setLugar] = React.useState("");
 
   /**
    * 🔽 OPCIONES DEL DROPDOWN (esto te faltaba)
@@ -45,8 +48,15 @@ export const SendMailForm: React.FC<ISendMailFormProps> = ({ context, configs })
    */
   const procesarTemplate = (html: string): string => {
     return html
-      .replace("{{FECHA}}", new Date().toLocaleDateString())
-      .replace("{{LUGAR}}", "Sala A");
+      .replace("{{FECHA}}", fecha || "________")
+      .replace("{{LUGAR}}", lugar || "________");
+  };
+
+  const validarCorreos = (lista: string): boolean => {
+    const emails = lista.split(";");
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    return emails.every(e => regex.test(e.trim()));
   };
 
   /**
@@ -72,7 +82,21 @@ export const SendMailForm: React.FC<ISendMailFormProps> = ({ context, configs })
           }
         });
 
+      if (!validarCorreos(to)) {
+        alert("Hay correos inválidos");
+        return;
+      }
+
       alert("Correo enviado correctamente 🚀");
+
+      await correoService.guardarHistorial({
+        asunto: subject,
+        plantilla: selectedConfig.Title,
+        destinatarios: to,
+        correoOrigen: selectedConfig.CorreoOrigen,
+        cuerpoHTML: body
+      });
+
 
     } catch (error) {
       console.error(error);
@@ -82,6 +106,18 @@ export const SendMailForm: React.FC<ISendMailFormProps> = ({ context, configs })
 
   return (
     <Stack tokens={{ childrenGap: 15 }}>
+
+      <TextField
+        label="Fecha"
+        value={fecha}
+        onChange={(_, v) => setFecha(v || "")}
+      />
+
+      <TextField
+        label="Lugar"
+        value={lugar}
+        onChange={(_, v) => setLugar(v || "")}
+      />
 
       {/* 🔽 DROPDOWN DE PLANTILLAS */}
       <Dropdown
@@ -110,6 +146,21 @@ export const SendMailForm: React.FC<ISendMailFormProps> = ({ context, configs })
           return text;
         }}
       />
+
+      {/* 👀 PREVIEW DEL CORREO */}
+      <div>
+        <h3>Vista previa</h3>
+        <div
+          style={{
+            border: "1px solid #ccc",
+            padding: 15,
+            backgroundColor: "#fff",
+            maxHeight: "400px",
+            overflow: "auto"
+          }}
+          dangerouslySetInnerHTML={{ __html: procesarTemplate(body) }}
+        />
+      </div>
 
       <PrimaryButton
         text="Enviar correo"

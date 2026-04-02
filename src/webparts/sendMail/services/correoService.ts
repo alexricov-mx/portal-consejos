@@ -10,11 +10,13 @@ import { ICorreoConfig } from "../models/ICorreoConfig";
 export class CorreoService {
 
   private _sp: SPFI;
+  private context: WebPartContext;
 
-  constructor(context: WebPartContext) {
-    // 🔥 Nueva forma correcta de inicializar PnP
-    this._sp = spfi().using(SPFx(context));
-  }
+constructor(context: WebPartContext) {
+  this.context = context; // 🔥 guardar contexto
+
+  this._sp = spfi().using(SPFx(context));
+}
 
   /**
    * Obtiene todas las configuraciones activas
@@ -32,4 +34,28 @@ export class CorreoService {
 
     return items as ICorreoConfig[];
   }
+
+  public async guardarHistorial(data: {
+  asunto: string;
+  plantilla: string;
+  destinatarios: string;
+  correoOrigen: string;
+  cuerpoHTML: string;
+}): Promise<void> {
+
+  await this._sp.web.lists
+    .getByTitle("HistorialEnvios")
+    .items.add({
+      Title: data.asunto,
+      Plantilla: data.plantilla,
+      Destinatarios: data.destinatarios,
+      FechaEnvio: new Date(),
+      CorreoOrigen: data.correoOrigen,
+      CuerpoHTML: data.cuerpoHTML,
+
+      // 🔥 campo persona correcto
+      EnviadoPorId: this.context.pageContext.legacyPageContext.userId
+    });
+}
+
 }

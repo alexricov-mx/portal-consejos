@@ -25,7 +25,8 @@ export default class SendMailWebPart extends BaseClientSideWebPart<{}> {
 
       const element = React.createElement(SendMailForm, {
         context: this.context,
-        configs: configs // 👈 ahora mandamos lista
+        configs: configs,
+        correoService: this.correoService // 🔥 ESTE ES EL CAMBIO
       });
 
       ReactDom.render(element, this.domElement);
